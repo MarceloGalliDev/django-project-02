@@ -17,7 +17,7 @@ def recipe_api_list(request):
 
 @api_view(http_method_names=['GET',])
 def recipe_api_detail(request, pk):
-    recipe = get_object_or_404(Recipe.objects.filter(pk=pk).)
+    recipe = get_object_or_404(Recipe.objects.filter(pk=pk))
     serializer = RecipeSerializer(instance=recipe, many=False)
     # o serializer.data é um método do serializer para retornar os dados serializados
     return Response(serializer.data)

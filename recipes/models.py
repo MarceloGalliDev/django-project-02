@@ -31,7 +31,7 @@ class RecipeManager(models.Manager):
                 F('author__last_name'), Value(' ('),
                 F('author__username'), Value(')'),
             )
-        ).order_by('-id')
+        ).order_by('-id').select_related('category', 'author').prefetch_related('tags')
 
 
 class Recipe(models.Model):
