@@ -94,6 +94,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         # self.data() = dados ja salvos ou recebidos do cliente
         # self.validated_data() = dados depois de validados
         
+        # aqui estamos verificando os dados para atualiza-los
+        # devido a validações dos campos serem obrigatórios
+        if self.instance is not None and attrs.get('servings') is None:
+            attrs['servings'] = self.instance.servings
+            
+        if self.instance is not None and attrs.get('preparation_time') is None:
+            attrs['preparation_time'] = self.instance.preparation_time
+        
         super_validate = super().validate(attrs)
         AuthorRecipeValidator(
             data=attrs, 
