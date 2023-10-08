@@ -1,6 +1,6 @@
 from collections import defaultdict
 from rest_framework import serializers
-from .models import Category
+from .models import Category, Recipe
 from django.contrib.auth.models import User
 from tag.models import Tag
 from  authors.validators import AuthorRecipeValidator
@@ -21,13 +21,21 @@ class TagSerializer(serializers.Serializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
+        fields = [
+            'id', 'title', 'description', 'author',
+            'category', 'tags', 'public', 'preparation',
+            'tag_objects', 'tag_links',
+            'preparation_time', 'preparation_time_unit', 'servings',
+            'servings_unit',
+            'preparation_steps', 'cover'
+        ]
     
-    id = serializers.IntegerField(
-        read_only=True,
-    )
-    title = serializers.CharField(max_length=65)
-    description = serializers.CharField(max_length=165)
-    # source usamos para indicar qual o campo que está o model desse public
+    # id = serializers.IntegerField(
+    #     read_only=True,
+    # )
+    # title = serializers.CharField(max_length=65)
+    # description = serializers.CharField(max_length=165)
+    # # source usamos para indicar qual o campo que está o model desse public
     public = serializers.BooleanField(
         source="is_published",
         read_only=True,
