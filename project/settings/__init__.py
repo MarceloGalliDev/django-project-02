@@ -11,3 +11,4 @@ from .security import *
 from .templates import *
 
 from .debug_toolbar import *  # isort:skip
+from .drf_config import * # isort:skip
