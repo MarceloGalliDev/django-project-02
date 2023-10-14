@@ -9,7 +9,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-},
+}
 
 
 SIMPLE_JWT = {
@@ -18,4 +18,4 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "SIGNING_KEY": os.getenv('SECRET_KEY_JWT'),
     "AUTH_HEADER_TYPES": ("Bearer",),
-},
+}
