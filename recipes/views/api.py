@@ -3,10 +3,13 @@ from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from ..permissions import IsOwner
+from django.shortcuts import get_object_or_404
 from tag.models import Tag
-
 from ..models import Recipe
 from ..serializers import RecipeSerializer, TagSerializer
+from rest_framework import status
 
 
 class RecipeAPIv2Pagination(PageNumberPagination):
@@ -17,6 +20,8 @@ class RecipeAPIv2ViewSet(ModelViewSet):
     queryset = Recipe.objects.get_published()
     serializer_class = RecipeSerializer
     pagination_class = RecipeAPIv2Pagination
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
+    http_method_names = ['GET', 'OPTIONS', 'HEAD', 'POST', 'PATCH', 'DELETE']
 
     def get_serializer_class(self):
         return super().get_serializer_class()
@@ -29,6 +34,31 @@ class RecipeAPIv2ViewSet(ModelViewSet):
         context["example"] = 'this is in context now'
         return context
 
+    # vamos subscrever o get_object()
+    def get_object(self, *args, **kwargs):
+        pk = self.kwargs.get('pk', '')
+        obj = get_object_or_404(
+            self.get_queryset(),
+            pk=pk
+        )
+        
+        # esse método é uma subscrição
+        # para garantir que quando buscarmos uma recipe, vamos checar as permissoes de objetos
+        # a checagem é vinda do método has_object_permission()
+        self.check_object_permissions(
+            self.request,
+            obj
+        )
+        
+        return obj
+    
+    # aqui vamos subscrever o método get_permissions()
+    # para que não seja necessario estar logado para ler uma recipe
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsOwner(), ]
+        return super().get_permissions()
+
     def get_queryset(self):
         qs = super().get_queryset()
 
@@ -39,10 +69,19 @@ class RecipeAPIv2ViewSet(ModelViewSet):
 
         return qs
 
+    # vamos subscrever o metodo create para não deixar sem um author a recipe
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def partial_update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
+        recipe = self.get_object()
+        # recipe = self.get_queryset().filter(pk=pk).first()
 
-        recipe = self.get_queryset().filter(pk=pk).first()
         serializer = RecipeSerializer(
             instance=recipe,
             data=request.data,
@@ -107,3 +146,8 @@ def tag_api_detail(request, pk):
 #     # ai o PK do recipe será recebido através de kwargs
 #     # pk = kwargs.get('pk')
 #     # queryset = self.get_queryset().filter(pk=pk).first()
+
+# a permissão será personalizada
+# pois para deletar ou criar tem que ser o dono da recipe e estar autenticado
+
+# verificar o browsable api do django verificar documentação

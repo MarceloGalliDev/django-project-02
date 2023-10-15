@@ -9,6 +9,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # caso queira desativar o browser DRF
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
 
