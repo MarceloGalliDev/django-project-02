@@ -86,6 +86,8 @@ class Recipe(models.Model):
             quality=50,
         )
 
+    # subscrevemos o metodo save para que o slugfy seja salvo conforme o titulo
+    # mais um quantidade de caracteres randomizados
     def save(self, *args, **kwargs):
         if not self.slug:
             rand_letters = ''.join(
@@ -106,6 +108,10 @@ class Recipe(models.Model):
 
         return saved
 
+    # estamos subscrevendo o método clean
+    # fazendo validações apartir do model
+    # aqui o texto apresentado no error_messages aparecerá no campo de validação do input
+    # aqui procuramos recipes com mesmo título
     def clean(self, *args, **kwargs):
         error_messages = defaultdict(list)
 
